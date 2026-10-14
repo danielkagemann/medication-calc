@@ -27,6 +27,7 @@ Rewrite `src/App.tsx` as a medication quantity calculator. The user selects a da
 16. Keep the image title smaller on mobile screens.
 17. Use the shadcn Calendar and Popover components for selecting start and end dates.
 18. Build the app on every push and deploy the `main` branch build to GitHub Pages.
+19. Publish the built `dist` artifact through GitHub Actions and configure the Pages site for the project-repository path.
 
 ## Implementation notes
 
@@ -42,6 +43,7 @@ Rewrite `src/App.tsx` as a medication quantity calculator. The user selects a da
 - Keep associated labels available to screen readers when removing their visible presentation.
 - Use a GitHub Actions workflow to build on pushes and pull requests, and deploy the `main` branch artifact to GitHub Pages.
 - Set Vite's project-page base path from the GitHub repository name and use it for local static assets.
+- Configure GitHub Pages source as GitHub Actions; publishing the repository root serves Vite source files instead of the production build.
 
 ## Confirmed decisions
 
