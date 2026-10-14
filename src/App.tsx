@@ -106,10 +106,10 @@ function App() {
       parsedDropsPerMl > 0);
   const canAddMedication = Boolean(
     medicationName.trim() &&
-      unit &&
-      dayCount !== null &&
-      amountValuesAreValid &&
-      dropsPerMlIsValid,
+    unit &&
+    dayCount !== null &&
+    amountValuesAreValid &&
+    dropsPerMlIsValid,
   );
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
