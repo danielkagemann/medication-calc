@@ -1,6 +1,6 @@
 import { Fragment, useState, type FormEvent } from "react";
 import { format, parseISO } from "date-fns";
-import { Calculator, CalendarDays, ClipboardList } from "lucide-react";
+import { CalendarDays, ClipboardList, ListChecks, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -86,6 +86,31 @@ function App() {
   const [nextResultId, setNextResultId] = useState(1);
 
   const dayCount = getInclusiveDayCount(startDate, endDate);
+  const amountValues = [morning, midday, evening, night];
+  const requiresWholeNumbers = unit === "drop";
+  const amountValuesAreValid = amountValues.every((value) => {
+    const amount = Number(value);
+    return (
+      value.trim() !== "" &&
+      Number.isFinite(amount) &&
+      amount >= 0 &&
+      (!requiresWholeNumbers || Number.isInteger(amount))
+    );
+  });
+  const parsedDropsPerMl = unit === "drop" ? Number(dropsPerMl) : null;
+  const dropsPerMlIsValid =
+    unit !== "drop" ||
+    (dropsPerMl.trim() !== "" &&
+      parsedDropsPerMl !== null &&
+      Number.isFinite(parsedDropsPerMl) &&
+      parsedDropsPerMl > 0);
+  const canAddMedication = Boolean(
+    medicationName.trim() &&
+      unit &&
+      dayCount !== null &&
+      amountValuesAreValid &&
+      dropsPerMlIsValid,
+  );
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -100,18 +125,8 @@ function App() {
       return;
     }
 
-    const requiresWholeNumbers = unit === "drop";
-    const amountValues = [morning, midday, evening, night];
     const amounts = amountValues.map(Number);
-    if (
-      amounts.some(
-        (amount, index) =>
-          amountValues[index].trim() === "" ||
-          !Number.isFinite(amount) ||
-          amount < 0 ||
-          (requiresWholeNumbers && !Number.isInteger(amount)),
-      )
-    ) {
+    if (!amountValuesAreValid) {
       setFormError(
         requiresWholeNumbers
           ? "Use whole numbers for drops. Enter 0 for unused times."
@@ -120,14 +135,7 @@ function App() {
       return;
     }
 
-    const parsedDropsPerMl = unit === "drop" ? Number(dropsPerMl) : null;
-    if (
-      unit === "drop" &&
-      (!dropsPerMl.trim() ||
-        parsedDropsPerMl === null ||
-        !Number.isFinite(parsedDropsPerMl) ||
-        parsedDropsPerMl <= 0)
-    ) {
+    if (!dropsPerMlIsValid) {
       setFormError(
         "Enter the drops-per-mL ratio from the product instructions.",
       );
@@ -452,10 +460,10 @@ function App() {
                 <div className="flex justify-end border-b border-[#d5ded7] pb-7">
                   <Button
                     className="min-w-36 bg-[#1f5b4b] text-white hover:bg-[#174638]"
+                    disabled={!canAddMedication}
                     type="submit"
                   >
-                    <Calculator aria-hidden="true" className="size-4" />
-                    Calc
+                    Add medication
                   </Button>
                 </div>
               </form>
@@ -463,7 +471,14 @@ function App() {
 
             <section aria-labelledby="results-title" className="pt-7">
               <div className="mb-4 flex items-baseline justify-between gap-3">
-                <h2 id="results-title" className="text-lg font-semibold">
+                <h2
+                  id="results-title"
+                  className="flex items-center gap-2 text-lg font-semibold"
+                >
+                  <ListChecks
+                    aria-hidden="true"
+                    className="size-5 text-[#1f5b4b]"
+                  />
                   Calculated quantities
                 </h2>
                 <span className="text-sm text-[#557365]">
@@ -505,27 +520,46 @@ function App() {
                           {formatDate(result.endDate)}
                         </p>
                       </div>
-                      <div className="sm:text-right">
-                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#557365]">
-                          Total required
-                        </p>
-                        <p className="mt-1 text-2xl font-semibold tabular-nums text-[#1f5b4b]">
-                          {formatQuantity(
-                            result.totalMlRequired ?? result.totalRequired,
-                          )}{" "}
-                          <span className="text-base">
-                            {result.unit === "drop"
-                              ? "mL"
-                              : formatUnit(result.totalRequired, result.unit)}
-                          </span>
-                        </p>
-                        {result.unit === "drop" &&
-                          result.dropsPerMl !== null && (
-                            <p className="mt-1 text-xs text-[#557365]">
-                              {formatQuantity(result.totalRequired)} drops at{" "}
-                              {formatQuantity(result.dropsPerMl)} drops/mL
-                            </p>
-                          )}
+                      <div className="flex items-center justify-between gap-3 sm:justify-end">
+                        <div className="sm:text-right">
+                          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#557365]">
+                            Total required
+                          </p>
+                          <p className="mt-1 text-2xl font-semibold tabular-nums text-[#1f5b4b]">
+                            {formatQuantity(
+                              result.totalMlRequired ?? result.totalRequired,
+                            )}{" "}
+                            <span className="text-base">
+                              {result.unit === "drop"
+                                ? "mL"
+                                : formatUnit(result.totalRequired, result.unit)}
+                            </span>
+                          </p>
+                          {result.unit === "drop" &&
+                            result.dropsPerMl !== null && (
+                              <p className="mt-1 text-xs text-[#557365]">
+                                {formatQuantity(result.totalRequired)} drops at{" "}
+                                {formatQuantity(result.dropsPerMl)} drops/mL
+                              </p>
+                            )}
+                        </div>
+                        <Button
+                          aria-label={`Delete ${result.medicationName}`}
+                          className="shrink-0 text-red-700 hover:bg-red-50 hover:text-red-800"
+                          onClick={() =>
+                            setResults((currentResults) =>
+                              currentResults.filter(
+                                (item) => item.id !== result.id,
+                              ),
+                            )
+                          }
+                          size="icon"
+                          title={`Delete ${result.medicationName}`}
+                          type="button"
+                          variant="ghost"
+                        >
+                          <Trash2 aria-hidden="true" />
+                        </Button>
                       </div>
                     </li>
                   ))}

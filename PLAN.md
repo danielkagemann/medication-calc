@@ -12,8 +12,8 @@ Rewrite `src/App.tsx` as a medication quantity calculator. The user selects a da
    - Medication name.
    - Four required numeric daily amount fields: morning, midday, evening, and night. Enter `0` for unused time slots.
    - A required unit selector with `drop`, `pill`, `ml`, and `mg` options.
-4. On **Calc**, sum the four daily amounts, then multiply by the number of days to calculate the total quantity required.
-5. Show each successful calculation below the form, including medication name, per-day quantity, date-range day count, total quantity, and unit.
+4. On **Add medication**, sum the four daily amounts, then multiply by the number of days to calculate the total quantity required.
+5. Show each successful calculation below the form, including medication name, per-day quantity, date-range day count, total quantity, and unit; allow an individual result to be deleted with a trash-icon button.
 6. After a successful calculation, clear the medication name, four numeric amounts, and unit selection for the next medication. Keep the date range available.
 7. Validate the date range and numeric inputs before adding a result; require non-negative values and an end date on or after the start date.
 8. Keep the start and end date inputs on the same row.
@@ -28,6 +28,9 @@ Rewrite `src/App.tsx` as a medication quantity calculator. The user selects a da
 17. Use the shadcn Calendar and Popover components for selecting start and end dates.
 18. Build the app on every push and deploy the `main` branch build to GitHub Pages.
 19. Publish the built `dist` artifact through GitHub Actions and configure the Pages site for the project-repository path.
+20. Add a matching icon beside the calculated-quantities heading.
+21. Disable vertical page bounce at scroll boundaries while preserving normal page scrolling.
+22. Keep **Add medication** disabled until the medication name, unit, all four valid dose amounts, valid date range, and (for drops) conversion ratio are provided.
 
 ## Implementation notes
 
@@ -58,3 +61,4 @@ Rewrite `src/App.tsx` as a medication quantity calculator. The user selects a da
 - Run `npm run build` after implementation.
 - Check that the selected date range produces the expected day count and total quantity.
 - Check that invalid input does not create a result and that a successful calculation clears only the medication entry fields.
+- Check that **Add medication** remains disabled until all required fields are valid.
